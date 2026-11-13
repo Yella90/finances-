@@ -8,11 +8,12 @@ import Auth from './ecrans/Auth'
 import Accueil from './ecrans/Accueil'
 import Transactions from './ecrans/Transactions'
 import Reglages from './ecrans/Reglages'
+import Projets from './ecrans/Projets'
 import Saisie from './ecrans/Saisie'
 import Legal from './ecrans/Legal'
 import { lirePageLegale } from './lib/editeur'
 
-type Onglet = 'accueil' | 'transactions' | 'reglages'
+type Onglet = 'accueil' | 'transactions' | 'projets' | 'reglages'
 
 export default function App() {
   const [pageLegale, setPageLegale] = useState(() => lirePageLegale(window.location.hash))
@@ -103,6 +104,7 @@ function Application(props: {
           <Accueil profil={profil} donnees={donnees} allerAuxReglages={() => setOnglet('reglages')} />
         )}
         {onglet === 'transactions' && <Transactions profil={profil} donnees={donnees} />}
+        {onglet === 'projets' && <Projets profil={profil} donnees={donnees} />}
         {onglet === 'reglages' && <Reglages profil={profil} donnees={donnees} />}
       </main>
 
@@ -122,6 +124,10 @@ function Application(props: {
           aria-label="Ajouter un mouvement"
         >
           +
+        </button>
+        <button className={onglet === 'projets' ? 'actif' : ''} onClick={() => setOnglet('projets')}>
+          <span aria-hidden="true">▤</span>
+          Projets
         </button>
         <button className={onglet === 'reglages' ? 'actif' : ''} onClick={() => setOnglet('reglages')}>
           <span aria-hidden="true">⚙</span>

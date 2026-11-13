@@ -16,7 +16,12 @@ export default function Saisie(props: { profil: Utilisateur; donnees: Donnees; f
   const [compteId, setCompteId] = useState(donnees.comptes[0]?.id ?? '')
   const [date, setDate] = useState(aujourdhui())
   const [note, setNote] = useState('')
+  const [projetId, setProjetId] = useState('')
+  const [ligneId, setLigneId] = useState('')
   const [erreur, setErreur] = useState<string | null>(null)
+
+  const projetsOuverts = donnees.projets.filter((p) => p.statut === 'en_cours')
+  const lignesDuProjet = donnees.lignesBudget.filter((l) => l.projet_id === projetId)
 
   async function enregistrer(e: FormEvent) {
     e.preventDefault()
@@ -37,8 +42,8 @@ export default function Saisie(props: { profil: Utilisateur; donnees: Donnees; f
       compte_destination_id: null,
       categorie_id: type === 'depense' ? categorieId : null,
       source_revenu_id: type === 'revenu' && sourceId ? sourceId : null,
-      projet_id: null,
-      ligne_budget_id: null,
+      projet_id: type === 'depense' && projetId ? projetId : null,
+      ligne_budget_id: type === 'depense' && projetId && ligneId ? ligneId : null,
       objectif_id: null,
       regle_recurrente_id: null,
       note: note.trim() || null,
@@ -123,6 +128,41 @@ export default function Saisie(props: { profil: Utilisateur; donnees: Donnees; f
             ))}
           </select>
         </label>
+
+        {type === 'depense' && projetsOuverts.length > 0 && (
+          <div className={projetId && lignesDuProjet.length > 0 ? 'deux' : undefined}>
+            <label>
+              Projet
+              <select
+                value={projetId}
+                onChange={(e) => {
+                  setProjetId(e.target.value)
+                  setLigneId('')
+                }}
+              >
+                <option value="">Aucun</option>
+                {projetsOuverts.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nom}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {projetId && lignesDuProjet.length > 0 && (
+              <label>
+                Poste
+                <select value={ligneId} onChange={(e) => setLigneId(e.target.value)}>
+                  <option value="">Non précisé</option>
+                  {lignesDuProjet.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.nom}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
+        )}
 
         <label>
           Date

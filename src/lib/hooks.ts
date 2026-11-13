@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from './db'
 import { ecouterSync, lireEtatSync, type EtatSync } from './sync'
-import type { Categorie, Compte, SourceRevenu, Transaction } from '../types'
+import type { Categorie, Compte, LigneBudget, Projet, SourceRevenu, Transaction } from '../types'
 
 export interface Donnees {
   comptes: Compte[]
   categories: Categorie[]
   sources: SourceRevenu[]
   transactions: Transaction[]
+  projets: Projet[]
+  lignesBudget: LigneBudget[]
   pret: boolean
 }
 
@@ -17,22 +19,26 @@ const actif = <T extends { supprime_le: string | null }>(l: T) => !l.supprime_le
 /** Toutes les données locales, mises à jour en direct à chaque écriture. */
 export function useDonnees(): Donnees {
   const resultat = useLiveQuery(async () => {
-    const [comptes, categories, sources, transactions] = await Promise.all([
+    const [comptes, categories, sources, transactions, projets, lignesBudget] = await Promise.all([
       db.comptes.toArray(),
       db.categories.toArray(),
       db.sources_revenu.toArray(),
       db.transactions.orderBy('date_operation').reverse().toArray(),
+      db.projets.toArray(),
+      db.lignes_budget.toArray(),
     ])
     return {
       comptes: comptes.filter(actif).sort((a, b) => a.cree_le.localeCompare(b.cree_le)),
       categories: categories.filter(actif).sort((a, b) => a.cree_le.localeCompare(b.cree_le)),
       sources: sources.filter(actif).sort((a, b) => a.cree_le.localeCompare(b.cree_le)),
       transactions: transactions.filter(actif),
+      projets: projets.filter(actif).sort((a, b) => b.cree_le.localeCompare(a.cree_le)),
+      lignesBudget: lignesBudget.filter(actif).sort((a, b) => a.cree_le.localeCompare(b.cree_le)),
     }
   }, [])
   return resultat
     ? { ...resultat, pret: true }
-    : { comptes: [], categories: [], sources: [], transactions: [], pret: false }
+    : { comptes: [], categories: [], sources: [], transactions: [], projets: [], lignesBudget: [], pret: false }
 }
 
 export function useEtatSync(): EtatSync & { enAttente: number } {

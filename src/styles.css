@@ -148,7 +148,7 @@ button {
   max-width: 520px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr 64px 1fr;
+  grid-template-columns: 1fr 1fr 64px 1fr 1fr;
   align-items: center;
   background: var(--carte);
   border-top: 1px solid var(--trait);
@@ -770,4 +770,129 @@ a {
 .formulaire .aide {
   font-size: 0.8rem;
   color: var(--discret);
+}
+
+/* Projets et budgets */
+
+.projet-carte {
+  width: 100%;
+  text-align: left;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.jauge.haute {
+  height: 8px;
+  border-radius: 4px;
+  margin-top: 0;
+}
+
+.jauge .normal {
+  background: var(--positif);
+}
+
+.jauge .attention {
+  background: var(--or);
+}
+
+.jauge .depasse {
+  background: var(--negatif);
+}
+
+.etiquette {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--trait);
+  color: var(--discret);
+  white-space: nowrap;
+}
+
+.etiquette.attention {
+  background: var(--attention-fond);
+  color: var(--attention-texte);
+}
+
+.etiquette.depasse {
+  background: var(--erreur-fond);
+  color: var(--negatif);
+}
+
+.poste {
+  display: grid;
+  gap: 6px;
+}
+
+.poste .ligne {
+  align-items: center;
+}
+
+.poste .ligne strong {
+  flex: 1;
+  min-width: 0;
+  font-weight: 550;
+  overflow-wrap: break-word;
+}
+
+.poste .jauge {
+  margin-top: 0;
+}
+
+.poste p {
+  font-size: 0.8rem;
+}
+
+.titre-projet {
+  text-transform: none;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.resume-budget {
+  display: grid;
+  gap: 6px;
+}
+
+.resume-budget div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.resume-budget p {
+  font-size: 0.9rem;
+  color: var(--discret);
+}
+
+.resume-budget strong {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.statut {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--carte);
+  color: var(--texte);
+}
+
+.entete .retour {
+  padding-left: 0;
+}
+
+.projet-carte .discret {
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+}
+
+.projet-carte .discret span {
+  white-space: nowrap;
 }

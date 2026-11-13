@@ -53,3 +53,32 @@ export function depensesParCategorie(
     .map(([categorieId, total]) => ({ categorieId, total }))
     .sort((a, b) => b.total - a.total)
 }
+
+export type NiveauBudget = 'normal' | 'attention' | 'depasse'
+
+/** Alerte à partir de 80 % du budget consommé, dépassement à partir de 100 %. */
+export function niveauBudget(depense: number, prevu: number): NiveauBudget {
+  if (prevu <= 0) return depense > 0 ? 'depasse' : 'normal'
+  const part = depense / prevu
+  if (part >= 1) return 'depasse'
+  if (part >= 0.8) return 'attention'
+  return 'normal'
+}
+
+export interface DepensesProjets {
+  parProjet: Map<string, number>
+  parLigne: Map<string, number>
+}
+
+/** Total des dépenses rattachées à chaque projet et à chaque poste. */
+export function depensesDesProjets(transactions: Transaction[]): DepensesProjets {
+  const parProjet = new Map<string, number>()
+  const parLigne = new Map<string, number>()
+  for (const t of transactions) {
+    if (t.type !== 'depense' || !t.projet_id) continue
+    const m = Number(t.montant)
+    parProjet.set(t.projet_id, (parProjet.get(t.projet_id) ?? 0) + m)
+    if (t.ligne_budget_id) parLigne.set(t.ligne_budget_id, (parLigne.get(t.ligne_budget_id) ?? 0) + m)
+  }
+  return { parProjet, parLigne }
+}

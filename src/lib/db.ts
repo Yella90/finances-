@@ -1,8 +1,24 @@
 import Dexie, { type Table } from 'dexie'
-import type { Categorie, Compte, LignesParTable, NomTable, SourceRevenu, Transaction } from '../types'
+import type {
+  Categorie,
+  Compte,
+  LigneBudget,
+  LignesParTable,
+  NomTable,
+  Projet,
+  SourceRevenu,
+  Transaction,
+} from '../types'
 
 // Ordre d'envoi au serveur : les tables référencées passent avant celles qui les référencent.
-export const TABLES_SYNC: NomTable[] = ['comptes', 'categories', 'sources_revenu', 'transactions']
+export const TABLES_SYNC: NomTable[] = [
+  'comptes',
+  'categories',
+  'sources_revenu',
+  'projets',
+  'lignes_budget',
+  'transactions',
+]
 
 export interface ElementFile {
   seq?: number
@@ -20,6 +36,8 @@ class BaseLocale extends Dexie {
   categories!: Table<Categorie, string>
   sources_revenu!: Table<SourceRevenu, string>
   transactions!: Table<Transaction, string>
+  projets!: Table<Projet, string>
+  lignes_budget!: Table<LigneBudget, string>
   file_attente!: Table<ElementFile, number>
   meta!: Table<Meta, string>
 
@@ -32,6 +50,11 @@ class BaseLocale extends Dexie {
       transactions: 'id, date_operation, compte_id',
       file_attente: '++seq, table, id',
       meta: 'cle',
+    })
+    // Version 2 : budgets par projet.
+    this.version(2).stores({
+      projets: 'id',
+      lignes_budget: 'id, projet_id',
     })
   }
 }

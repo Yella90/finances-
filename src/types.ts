@@ -60,6 +60,24 @@ export interface Transaction extends LigneBase {
   note: string | null
 }
 
+export type StatutProjet = 'en_cours' | 'termine' | 'suspendu'
+
+export interface Projet extends LigneBase {
+  nom: string
+  description: string | null
+  budget_total: number
+  date_debut: string | null
+  date_fin: string | null
+  statut: StatutProjet
+}
+
+/** Un poste de dépense à l'intérieur d'un projet (ciment, main-d'œuvre...). */
+export interface LigneBudget extends LigneBase {
+  projet_id: string
+  nom: string
+  montant_prevu: number
+}
+
 export interface Utilisateur {
   id: string
   nom_complet: string
@@ -74,6 +92,8 @@ export interface LignesParTable {
   comptes: Compte
   categories: Categorie
   sources_revenu: SourceRevenu
+  projets: Projet
+  lignes_budget: LigneBudget
   transactions: Transaction
 }
 
