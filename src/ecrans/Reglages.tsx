@@ -1,9 +1,9 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { soldesParCompte } from '../lib/calculs'
-import { creer, db, supprimer, viderBaseLocale } from '../lib/db'
+import { creer, db, supprimer } from '../lib/db'
 import { formaterMontant } from '../lib/format'
 import { useEtatSync, type Donnees } from '../lib/hooks'
-import { supabase } from '../lib/supabase'
+import { deconnecter } from '../lib/session'
 import { synchroniser } from '../lib/sync'
 import type { Frequence, TypeCompte, TypeSource, Utilisateur } from '../types'
 import SignatureUnitech from './SignatureUnitech'
@@ -71,8 +71,7 @@ export default function Reglages(props: { profil: Utilisateur; donnees: Donnees 
       )
       if (!ok) return
     }
-    await supabase.auth.signOut()
-    await viderBaseLocale()
+    await deconnecter()
   }
 
   return (

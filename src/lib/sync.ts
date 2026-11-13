@@ -1,4 +1,5 @@
 import { db, ecrireMeta, lireMeta, TABLES_SYNC } from './db'
+import { lireSessionStockee } from './jeton'
 import { supabase } from './supabase'
 import type { NomTable } from '../types'
 
@@ -104,8 +105,7 @@ export function synchroniser(): Promise<void> {
   publier({ enCours: true })
   enCours = (async () => {
     try {
-      const { data } = await supabase.auth.getSession()
-      if (!data.session) return
+      if (!lireSessionStockee()) return
       await envoyer()
       await recevoir()
       publier({ erreur: null, derniereReussite: new Date().toISOString() })

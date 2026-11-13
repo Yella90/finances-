@@ -1,17 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { supabase } from '../lib/supabase'
+import { connecter, inscrire } from '../lib/session'
 import { DEVISES } from '../lib/format'
 import SignatureUnitech from './SignatureUnitech'
 import { EDITEUR } from '../lib/editeur'
-
-function traduireErreur(message: string): string {
-  if (/Invalid login credentials/i.test(message)) return 'Email ou mot de passe incorrect.'
-  if (/already registered/i.test(message)) return 'Un compte existe déjà avec cet email. Connectez-vous.'
-  if (/Email not confirmed/i.test(message)) return 'Confirmez votre email avant de vous connecter.'
-  if (/at least 6/i.test(message)) return 'Le mot de passe doit contenir au moins 6 caractères.'
-  if (/fetch/i.test(message)) return 'Pas de connexion. Réessayez quand le réseau revient.'
-  return message
-}
 
 export default function Auth() {
   const [mode, setMode] = useState<'connexion' | 'inscription'>('connexion')
@@ -24,43 +15,28 @@ export default function Auth() {
   const [accord, setAccord] = useState(false)
   const [envoi, setEnvoi] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
-  const [info, setInfo] = useState<string | null>(null)
 
   async function soumettre(e: FormEvent) {
     e.preventDefault()
     setErreur(null)
-    setInfo(null)
     setEnvoi(true)
     try {
       if (mode === 'connexion') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password: motDePasse })
-        if (error) throw error
+        await connecter(email, motDePasse)
       } else {
-        const { data, error } = await supabase.auth.signUp({
+        await inscrire({
           email,
-          password: motDePasse,
-          options: {
-            data: {
-              nom_complet: nom.trim(),
-              telephone: telephone.trim(),
-              devise,
-              langue,
-              application: 'finances',
-              // Trace de l'accord donné à l'inscription et de la version acceptée.
-              conditions_acceptees_le: new Date().toISOString(),
-              conditions_version: EDITEUR.derniereMiseAJour,
-            },
-          },
+          motDePasse,
+          nomComplet: nom,
+          telephone,
+          devise,
+          langue,
+          // Version des conditions acceptées, enregistrée avec le compte.
+          versionConditions: EDITEUR.derniereMiseAJour,
         })
-        if (error) throw error
-        if (!data.session) {
-          setInfo('Compte créé. Ouvrez le lien reçu par email pour le confirmer, puis connectez-vous.')
-          setMode('connexion')
-        }
       }
     } catch (err) {
-      setErreur(traduireErreur(err instanceof Error ? err.message : String(err)))
-    } finally {
+      setErreur(err instanceof Error ? err.message : String(err))
       setEnvoi(false)
     }
   }
@@ -117,9 +93,14 @@ export default function Auth() {
             value={motDePasse}
             onChange={(e) => setMotDePasse(e.target.value)}
             required
-            minLength={6}
+            minLength={inscription ? 8 : undefined}
             autoComplete={inscription ? 'new-password' : 'current-password'}
           />
+          {inscription && (
+            <span className="aide">
+              Au moins 8 caractères. Notez-le bien : il ne peut pas encore être réinitialisé si vous l'oubliez.
+            </span>
+          )}
         </label>
 
         {inscription && (
@@ -161,7 +142,6 @@ export default function Auth() {
         )}
 
         {erreur && <p className="message erreur">{erreur}</p>}
-        {info && <p className="message succes">{info}</p>}
 
         <button className="bouton principal" type="submit" disabled={envoi}>
           {envoi ? 'Un instant…' : inscription ? 'Créer mon compte' : 'Se connecter'}

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import type { Session } from '@supabase/supabase-js'
-import { configurationManquante, supabase } from './lib/supabase'
-import { chargerProfil } from './lib/profil'
+import { configurationManquante } from './lib/supabase'
+import { ecouterSession, lireSession, verifierSession } from './lib/session'
 import { demarrerSyncAuto } from './lib/sync'
 import { useDonnees } from './lib/hooks'
 import type { Utilisateur } from './types'
@@ -43,43 +42,27 @@ export default function App() {
 }
 
 function Contenu() {
-  const [session, setSession] = useState<Session | null | undefined>(undefined)
-  const [profil, setProfil] = useState<Utilisateur | null>(null)
-  const [erreurProfil, setErreurProfil] = useState<string | null>(null)
+  const [session, setSession] = useState(lireSession)
   const [onglet, setOnglet] = useState<Onglet>('accueil')
   const [saisieOuverte, setSaisieOuverte] = useState(false)
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data } = supabase.auth.onAuthStateChange((_evenement, s) => setSession(s))
-    return () => data.subscription.unsubscribe()
-  }, [])
+  useEffect(() => ecouterSession(setSession), [])
 
-  const utilisateur = session?.user
+  const utilisateurId = session?.utilisateur.id
   useEffect(() => {
-    if (!utilisateur) {
-      setProfil(null)
-      return
-    }
-    let annule = false
+    if (!utilisateurId) return
     let arreterSync: (() => void) | undefined
-    setErreurProfil(null)
-    chargerProfil(utilisateur)
-      .then((p) => {
-        if (annule) return
-        setProfil(p)
-        arreterSync = demarrerSyncAuto()
-      })
-      .catch((e: unknown) => {
-        if (!annule) setErreurProfil(e instanceof Error ? e.message : String(e))
-      })
+    let annule = false
+    // On confirme d'abord que la session est encore valable côté serveur.
+    // Hors ligne, la session locale suffit pour continuer à travailler.
+    verifierSession().then((valable) => {
+      if (valable && !annule) arreterSync = demarrerSyncAuto()
+    })
     return () => {
       annule = true
       arreterSync?.()
     }
-    // On ne recharge que si l'utilisateur change, pas à chaque rafraîchissement du jeton.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [utilisateur?.id])
+  }, [utilisateurId])
 
   if (configurationManquante) {
     return (
@@ -90,25 +73,17 @@ function Contenu() {
     )
   }
 
-  if (session === undefined) return <main className="centre">Chargement…</main>
   if (!session) return <Auth />
 
-  if (erreurProfil) {
-    return (
-      <main className="centre">
-        <h1>Profil indisponible</h1>
-        <p>Impossible de charger votre profil. Vérifiez que le schéma « finances » est exposé dans Supabase.</p>
-        <p className="discret">{erreurProfil}</p>
-        <button className="bouton" onClick={() => supabase.auth.signOut()}>
-          Se déconnecter
-        </button>
-      </main>
-    )
-  }
-
-  if (!profil) return <main className="centre">Chargement…</main>
-
-  return <Application profil={profil} onglet={onglet} setOnglet={setOnglet} saisieOuverte={saisieOuverte} setSaisieOuverte={setSaisieOuverte} />
+  return (
+    <Application
+      profil={session.utilisateur}
+      onglet={onglet}
+      setOnglet={setOnglet}
+      saisieOuverte={saisieOuverte}
+      setSaisieOuverte={setSaisieOuverte}
+    />
+  )
 }
 
 function Application(props: {

@@ -766,3 +766,8 @@ a {
   display: grid;
   gap: 6px;
 }
+
+.formulaire .aide {
+  font-size: 0.8rem;
+  color: var(--discret);
+}
