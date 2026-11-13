@@ -71,8 +71,8 @@ export default function Accueil(props: { profil: Utilisateur; donnees: Donnees; 
               {totaux.map((t) => (
                 <div key={t.mois} className="groupe" title={`${nomMois(t.mois)} : +${argent(t.revenus)}, −${argent(t.depenses)}`}>
                   <div className="paire">
-                    <span className="barre revenu" style={{ height: `${(t.revenus / plusHaut) * 100}%` }} />
-                    <span className="barre depense" style={{ height: `${(t.depenses / plusHaut) * 100}%` }} />
+                    <span className="baton revenu" style={{ height: `${(t.revenus / plusHaut) * 100}%` }} />
+                    <span className="baton depense" style={{ height: `${(t.depenses / plusHaut) * 100}%` }} />
                   </div>
                   <small>{nomMois(t.mois, true)}</small>
                 </div>
