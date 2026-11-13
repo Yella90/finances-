@@ -671,3 +671,20 @@ button:focus-visible {
   text-align: right;
   overflow-wrap: anywhere;
 }
+
+/* Mention de l'éditeur */
+
+.signature {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--discret);
+  font-size: 0.85rem;
+  padding: 4px 0;
+}
+
+.signature strong {
+  color: var(--texte);
+  letter-spacing: 0.06em;
+}

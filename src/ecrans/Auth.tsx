@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import { DEVISES } from '../lib/format'
+import SignatureUnitech from './SignatureUnitech'
 
 function traduireErreur(message: string): string {
   if (/Invalid login credentials/i.test(message)) return 'Email ou mot de passe incorrect.'
@@ -156,6 +157,8 @@ export default function Auth() {
           {inscription ? 'J\'ai déjà un compte' : 'Créer un compte'}
         </button>
       </form>
+
+      <SignatureUnitech />
     </main>
   )
 }

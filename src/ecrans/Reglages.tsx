@@ -6,6 +6,7 @@ import { useEtatSync, type Donnees } from '../lib/hooks'
 import { supabase } from '../lib/supabase'
 import { synchroniser } from '../lib/sync'
 import type { Frequence, TypeCompte, TypeSource, Utilisateur } from '../types'
+import SignatureUnitech from './SignatureUnitech'
 
 const TYPES_COMPTE: Record<TypeCompte, string> = {
   especes: 'Espèces',
@@ -150,6 +151,8 @@ export default function Reglages(props: { profil: Utilisateur; donnees: Donnees 
           Se déconnecter
         </button>
       </section>
+
+      <SignatureUnitech />
     </>
   )
 }

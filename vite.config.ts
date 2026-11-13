@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icone.svg'],
+      includeAssets: ['icone.svg', 'unitech.svg'],
       manifest: {
         name: 'Finances',
         short_name: 'Finances',
