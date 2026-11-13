@@ -5,6 +5,7 @@ import type {
   LigneBudget,
   LignesParTable,
   NomTable,
+  ObjectifEpargne,
   Projet,
   SourceRevenu,
   Transaction,
@@ -17,6 +18,7 @@ export const TABLES_SYNC: NomTable[] = [
   'sources_revenu',
   'projets',
   'lignes_budget',
+  'objectifs_epargne',
   'transactions',
 ]
 
@@ -38,6 +40,7 @@ class BaseLocale extends Dexie {
   transactions!: Table<Transaction, string>
   projets!: Table<Projet, string>
   lignes_budget!: Table<LigneBudget, string>
+  objectifs_epargne!: Table<ObjectifEpargne, string>
   file_attente!: Table<ElementFile, number>
   meta!: Table<Meta, string>
 
@@ -55,6 +58,10 @@ class BaseLocale extends Dexie {
     this.version(2).stores({
       projets: 'id',
       lignes_budget: 'id, projet_id',
+    })
+    // Version 3 : objectifs d'épargne.
+    this.version(3).stores({
+      objectifs_epargne: 'id',
     })
   }
 }

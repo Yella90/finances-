@@ -78,6 +78,14 @@ export interface LigneBudget extends LigneBase {
   montant_prevu: number
 }
 
+export interface ObjectifEpargne extends LigneBase {
+  nom: string
+  montant_cible: number
+  date_cible: string | null
+  icone: string | null
+  statut: 'en_cours' | 'atteint' | 'abandonne'
+}
+
 export interface Utilisateur {
   id: string
   nom_complet: string
@@ -94,6 +102,7 @@ export interface LignesParTable {
   sources_revenu: SourceRevenu
   projets: Projet
   lignes_budget: LigneBudget
+  objectifs_epargne: ObjectifEpargne
   transactions: Transaction
 }
 

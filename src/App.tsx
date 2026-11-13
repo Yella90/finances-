@@ -8,13 +8,13 @@ import Auth from './ecrans/Auth'
 import Accueil from './ecrans/Accueil'
 import Transactions from './ecrans/Transactions'
 import Reglages from './ecrans/Reglages'
-import Projets from './ecrans/Projets'
+import Plans from './ecrans/Plans'
 import Saisie from './ecrans/Saisie'
 import Legal from './ecrans/Legal'
 import { lirePageLegale } from './lib/editeur'
 import { ecouterAnnonces, type Annonce } from './lib/notifications'
 
-type Onglet = 'accueil' | 'transactions' | 'projets' | 'reglages'
+type Onglet = 'accueil' | 'transactions' | 'plans' | 'reglages'
 
 export default function App() {
   const [pageLegale, setPageLegale] = useState(() => lirePageLegale(window.location.hash))
@@ -124,7 +124,7 @@ function Application(props: {
           <Accueil profil={profil} donnees={donnees} allerAuxReglages={() => setOnglet('reglages')} />
         )}
         {onglet === 'transactions' && <Transactions profil={profil} donnees={donnees} />}
-        {onglet === 'projets' && <Projets profil={profil} donnees={donnees} />}
+        {onglet === 'plans' && <Plans profil={profil} donnees={donnees} />}
         {onglet === 'reglages' && <Reglages profil={profil} donnees={donnees} />}
       </main>
 
@@ -145,9 +145,9 @@ function Application(props: {
         >
           +
         </button>
-        <button className={onglet === 'projets' ? 'actif' : ''} onClick={() => setOnglet('projets')}>
-          <span aria-hidden="true">▤</span>
-          Projets
+        <button className={onglet === 'plans' ? 'actif' : ''} onClick={() => setOnglet('plans')}>
+          <span aria-hidden="true">◎</span>
+          Plans
         </button>
         <button className={onglet === 'reglages' ? 'actif' : ''} onClick={() => setOnglet('reglages')}>
           <span aria-hidden="true">⚙</span>

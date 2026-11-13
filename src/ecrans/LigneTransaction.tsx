@@ -13,9 +13,16 @@ export default function LigneTransaction(props: {
   const categorie = donnees.categories.find((c) => c.id === t.categorie_id)
   const source = donnees.sources.find((s) => s.id === t.source_revenu_id)
 
+  const objectif = donnees.objectifs.find((o) => o.id === t.objectif_id)
+
   const estRevenu = t.type === 'revenu'
-  const titre = estRevenu ? source?.nom ?? 'Revenu' : categorie?.nom ?? 'Dépense'
-  const icone = estRevenu ? '💰' : categorie?.icone ?? '📦'
+  const estEpargne = t.type === 'epargne'
+  const titre = estRevenu
+    ? source?.nom ?? 'Revenu'
+    : estEpargne
+      ? `Épargne : ${objectif?.nom ?? 'objectif supprimé'}`
+      : categorie?.nom ?? 'Dépense'
+  const icone = estRevenu ? '💰' : estEpargne ? objectif?.icone ?? '🎯' : categorie?.icone ?? '📦'
 
   return (
     <li className="mouvement">

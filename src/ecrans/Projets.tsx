@@ -61,10 +61,6 @@ export default function Projets(props: { profil: Utilisateur; donnees: Donnees }
 
   return (
     <>
-      <header className="entete">
-        <h1>Projets</h1>
-      </header>
-
       {donnees.pret && donnees.projets.length === 0 && (
         <section className="carte vide">
           <h2>Suivez le budget de vos projets</h2>

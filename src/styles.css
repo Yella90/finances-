@@ -934,3 +934,25 @@ a {
 .annonce .icone-bouton {
   color: inherit;
 }
+
+/* Objectifs d'épargne */
+
+.etiquette.reussi {
+  background: var(--vert-clair);
+  color: var(--positif);
+}
+
+.annonce.normal {
+  background: var(--vert-clair);
+  color: var(--positif);
+}
+
+.carte > .ligne > strong {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.carte > .ligne {
+  align-items: center;
+}

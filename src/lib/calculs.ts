@@ -1,4 +1,4 @@
-import type { Compte, Transaction } from '../types'
+import type { Compte, ObjectifEpargne, Transaction } from '../types'
 
 /** Solde de chaque compte : solde initial + entrées − sorties. */
 export function soldesParCompte(comptes: Compte[], transactions: Transaction[]): Map<string, number> {
@@ -81,4 +81,58 @@ export function depensesDesProjets(transactions: Transaction[]): DepensesProjets
     if (t.ligne_budget_id) parLigne.set(t.ligne_budget_id, (parLigne.get(t.ligne_budget_id) ?? 0) + m)
   }
   return { parProjet, parLigne }
+}
+
+/** Total versé sur chaque objectif d'épargne. */
+export function epargneParObjectif(transactions: Transaction[]): Map<string, number> {
+  const totaux = new Map<string, number>()
+  for (const t of transactions) {
+    if (t.type !== 'epargne' || !t.objectif_id) continue
+    totaux.set(t.objectif_id, (totaux.get(t.objectif_id) ?? 0) + Number(t.montant))
+  }
+  return totaux
+}
+
+export interface SuiviObjectif {
+  epargne: number
+  reste: number
+  /** Avancement en pourcentage, plafonné à 100. */
+  part: number
+  atteint: boolean
+  /** Jours avant la date visée ; 0 si elle est passée ou absente. */
+  joursRestants: number
+  /** Montant à mettre de côté chaque mois pour arriver à temps ; null sans date. */
+  effortMensuel: number | null
+  /** Écart avec un rythme régulier depuis la création de l'objectif. */
+  retard: number
+}
+
+const JOUR = 24 * 60 * 60 * 1000
+const JOURS_PAR_MOIS = 30.44
+
+export function suiviObjectif(objectif: ObjectifEpargne, epargne: number, maintenant = new Date()): SuiviObjectif {
+  const cible = Number(objectif.montant_cible)
+  const reste = Math.max(0, cible - epargne)
+  const atteint = epargne >= cible
+  const part = cible > 0 ? Math.min(100, (epargne / cible) * 100) : 0
+
+  if (!objectif.date_cible) {
+    return { epargne, reste, part, atteint, joursRestants: 0, effortMensuel: null, retard: 0 }
+  }
+
+  const [a, m, j] = objectif.date_cible.split('-').map(Number)
+  const fin = new Date(a, m - 1, j).getTime()
+  const debut = new Date(objectif.cree_le).getTime()
+  const joursRestants = Math.max(0, Math.ceil((fin - maintenant.getTime()) / JOUR))
+
+  // Au moins un mois : sinon un objectif à 10 jours afficherait un effort « par mois » trompeur.
+  const moisRestants = Math.max(1, joursRestants / JOURS_PAR_MOIS)
+  const effortMensuel = joursRestants > 0 ? Math.ceil(reste / moisRestants) : reste
+
+  const duree = fin - debut
+  const ecoule = Math.min(Math.max(maintenant.getTime() - debut, 0), Math.max(duree, 0))
+  const attendu = duree > 0 ? cible * (ecoule / duree) : 0
+  const retard = atteint ? 0 : Math.max(0, Math.round(attendu - epargne))
+
+  return { epargne, reste, part, atteint, joursRestants, effortMensuel, retard }
 }
