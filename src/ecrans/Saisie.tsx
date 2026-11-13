@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react'
 import { creer } from '../lib/db'
 import { aujourdhui } from '../lib/format'
 import { useEnLigne, type Donnees } from '../lib/hooks'
+import { depensesDesProjets } from '../lib/calculs'
+import { alerteBudget, annoncer } from '../lib/notifications'
 import { synchroniser } from '../lib/sync'
 import type { Utilisateur } from '../types'
 
@@ -48,8 +50,29 @@ export default function Saisie(props: { profil: Utilisateur; donnees: Donnees; f
       regle_recurrente_id: null,
       note: note.trim() || null,
     })
+    if (type === 'depense' && projetId) signalerBudget(Math.round(valeur * 100) / 100)
     void synchroniser()
     fermer()
+  }
+
+  /** Prévient si cette dépense fait passer le projet ou le poste à 80 % ou 100 %. */
+  function signalerBudget(montantAjoute: number) {
+    const projet = donnees.projets.find((p) => p.id === projetId)
+    if (!projet) return
+    const avant = depensesDesProjets(donnees.transactions)
+
+    const poste = donnees.lignesBudget.find((l) => l.id === ligneId)
+    const dejaPoste = poste ? avant.parLigne.get(poste.id) ?? 0 : 0
+    const alertePoste = poste
+      ? alerteBudget(`${projet.nom}, ${poste.nom}`, dejaPoste, dejaPoste + montantAjoute, Number(poste.montant_prevu))
+      : null
+
+    const dejaProjet = avant.parProjet.get(projet.id) ?? 0
+    const alerteProjet = alerteBudget(projet.nom, dejaProjet, dejaProjet + montantAjoute, Number(projet.budget_total))
+
+    // Une seule annonce à la fois : celle du projet entier l'emporte.
+    const alerte = alerteProjet ?? alertePoste
+    if (alerte) void annoncer(alerte)
   }
 
   return (

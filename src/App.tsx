@@ -12,6 +12,7 @@ import Projets from './ecrans/Projets'
 import Saisie from './ecrans/Saisie'
 import Legal from './ecrans/Legal'
 import { lirePageLegale } from './lib/editeur'
+import { ecouterAnnonces, type Annonce } from './lib/notifications'
 
 type Onglet = 'accueil' | 'transactions' | 'projets' | 'reglages'
 
@@ -96,9 +97,28 @@ function Application(props: {
 }) {
   const { profil, onglet, setOnglet, saisieOuverte, setSaisieOuverte } = props
   const donnees = useDonnees()
+  const [annonce, setAnnonce] = useState<Annonce | null>(null)
+
+  useEffect(() => ecouterAnnonces(setAnnonce), [])
+  useEffect(() => {
+    if (!annonce) return
+    const minuteur = window.setTimeout(() => setAnnonce(null), 8000)
+    return () => window.clearTimeout(minuteur)
+  }, [annonce])
 
   return (
     <div className="app">
+      {annonce && (
+        <div className={`annonce ${annonce.niveau}`} role="alert">
+          <div>
+            <strong>{annonce.titre}</strong>
+            <p>{annonce.corps}</p>
+          </div>
+          <button className="icone-bouton" onClick={() => setAnnonce(null)} aria-label="Fermer">
+            ✕
+          </button>
+        </div>
+      )}
       <main className="contenu">
         {onglet === 'accueil' && (
           <Accueil profil={profil} donnees={donnees} allerAuxReglages={() => setOnglet('reglages')} />

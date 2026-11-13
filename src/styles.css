@@ -896,3 +896,41 @@ a {
 .projet-carte .discret span {
   white-space: nowrap;
 }
+
+/* Bandeau d'annonce (alertes de budget) */
+
+.annonce {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 12px;
+  right: 12px;
+  max-width: 496px;
+  margin: 0 auto;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--rayon);
+  background: var(--attention-fond);
+  color: var(--attention-texte);
+  border: 1px solid currentColor;
+}
+
+.annonce.depasse {
+  background: var(--erreur-fond);
+  color: var(--negatif);
+}
+
+.annonce div {
+  flex: 1;
+  min-width: 0;
+}
+
+.annonce p {
+  font-size: 0.9rem;
+}
+
+.annonce .icone-bouton {
+  color: inherit;
+}

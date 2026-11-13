@@ -3,6 +3,12 @@ import { soldesParCompte } from '../lib/calculs'
 import { creer, db, supprimer } from '../lib/db'
 import { formaterMontant } from '../lib/format'
 import { useEtatSync, type Donnees } from '../lib/hooks'
+import {
+  activerNotifications,
+  desactiverNotifications,
+  etatNotifications,
+  type EtatNotifications,
+} from '../lib/notifications'
 import { deconnecter } from '../lib/session'
 import { synchroniser } from '../lib/sync'
 import type { Frequence, TypeCompte, TypeSource, Utilisateur } from '../types'
@@ -121,6 +127,8 @@ export default function Reglages(props: { profil: Utilisateur; donnees: Donnees 
         <FormulaireSource profil={profil} donnees={donnees} />
       </section>
 
+      <SectionNotifications profil={profil} />
+
       <section className="carte">
         <h2>Synchronisation</h2>
         <p className="discret">
@@ -153,6 +161,70 @@ export default function Reglages(props: { profil: Utilisateur; donnees: Donnees 
 
       <SignatureUnitech />
     </>
+  )
+}
+
+function SectionNotifications({ profil }: { profil: Utilisateur }) {
+  const [etat, setEtat] = useState<EtatNotifications>(etatNotifications)
+  const [info, setInfo] = useState<string | null>(null)
+  const [enCours, setEnCours] = useState(false)
+
+  async function activer() {
+    setEnCours(true)
+    const resultat = await activerNotifications(profil.id)
+    setEtat(resultat.etat)
+    setInfo(
+      resultat.etat !== 'actives'
+        ? null
+        : resultat.rappelsServeur
+          ? 'Cet appareil recevra les alertes de budget et les rappels.'
+          : 'Les alertes de budget sont actives. Les rappels quand l\'app est fermée arriveront plus tard.',
+    )
+    setEnCours(false)
+  }
+
+  async function desactiver() {
+    setEnCours(true)
+    await desactiverNotifications()
+    setEtat(etatNotifications())
+    setInfo(null)
+    setEnCours(false)
+  }
+
+  return (
+    <section className="carte">
+      <h2>Notifications</h2>
+      {etat === 'non_supportees' && (
+        <p className="discret">
+          Ce navigateur ne gère pas les notifications. Sur iPhone, ajoutez d'abord l'app à l'écran d'accueil.
+        </p>
+      )}
+      {etat === 'refusees' && (
+        <p className="discret">
+          Les notifications sont bloquées pour ce site. Autorisez-les dans les réglages du navigateur, puis
+          revenez ici.
+        </p>
+      )}
+      {etat === 'desactivees' && (
+        <>
+          <p className="discret">
+            Recevez une alerte quand un budget atteint 80 % ou est dépassé. Les alertes s'affichent toujours
+            dans l'app, même sans cette option.
+          </p>
+          <button className="bouton principal" onClick={activer} disabled={enCours}>
+            Activer les notifications
+          </button>
+        </>
+      )}
+      {etat === 'actives' && (
+        <>
+          <p className="discret">{info ?? 'Les notifications sont actives sur cet appareil.'}</p>
+          <button className="bouton" onClick={desactiver} disabled={enCours}>
+            Désactiver
+          </button>
+        </>
+      )}
+    </section>
   )
 }
 
