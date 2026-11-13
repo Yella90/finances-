@@ -10,10 +10,39 @@ import Accueil from './ecrans/Accueil'
 import Transactions from './ecrans/Transactions'
 import Reglages from './ecrans/Reglages'
 import Saisie from './ecrans/Saisie'
+import Legal from './ecrans/Legal'
+import { lirePageLegale } from './lib/editeur'
 
 type Onglet = 'accueil' | 'transactions' | 'reglages'
 
 export default function App() {
+  const [pageLegale, setPageLegale] = useState(() => lirePageLegale(window.location.hash))
+
+  useEffect(() => {
+    const surChangement = () => setPageLegale(lirePageLegale(window.location.hash))
+    window.addEventListener('hashchange', surChangement)
+    return () => window.removeEventListener('hashchange', surChangement)
+  }, [])
+
+  // La page légale s'affiche par-dessus : l'écran en dessous garde son état
+  // (un formulaire d'inscription en cours n'est pas perdu).
+  return (
+    <>
+      <Contenu />
+      {pageLegale && (
+        <Legal
+          page={pageLegale}
+          fermer={() => {
+            window.history.replaceState(null, '', window.location.pathname)
+            setPageLegale(null)
+          }}
+        />
+      )}
+    </>
+  )
+}
+
+function Contenu() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
   const [profil, setProfil] = useState<Utilisateur | null>(null)
   const [erreurProfil, setErreurProfil] = useState<string | null>(null)

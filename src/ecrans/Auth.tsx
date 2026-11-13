@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import { DEVISES } from '../lib/format'
 import SignatureUnitech from './SignatureUnitech'
+import { EDITEUR } from '../lib/editeur'
 
 function traduireErreur(message: string): string {
   if (/Invalid login credentials/i.test(message)) return 'Email ou mot de passe incorrect.'
@@ -20,6 +21,7 @@ export default function Auth() {
   const [motDePasse, setMotDePasse] = useState('')
   const [devise, setDevise] = useState('XOF')
   const [langue, setLangue] = useState<'fr' | 'bm'>('fr')
+  const [accord, setAccord] = useState(false)
   const [envoi, setEnvoi] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
@@ -38,7 +40,16 @@ export default function Auth() {
           email,
           password: motDePasse,
           options: {
-            data: { nom_complet: nom.trim(), telephone: telephone.trim(), devise, langue, application: 'finances' },
+            data: {
+              nom_complet: nom.trim(),
+              telephone: telephone.trim(),
+              devise,
+              langue,
+              application: 'finances',
+              // Trace de l'accord donné à l'inscription et de la version acceptée.
+              conditions_acceptees_le: new Date().toISOString(),
+              conditions_version: EDITEUR.derniereMiseAJour,
+            },
           },
         })
         if (error) throw error
@@ -137,6 +148,16 @@ export default function Auth() {
               <p className="discret">La traduction en bamanankan arrive bientôt. En attendant, l'app s'affiche en français.</p>
             )}
           </>
+        )}
+
+        {inscription && (
+          <label className="accord">
+            <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.target.checked)} required />
+            <span>
+              J'accepte les <a href="#conditions">conditions d'utilisation</a> et la{' '}
+              <a href="#confidentialite">politique de confidentialité et cookies</a>.
+            </span>
+          </label>
         )}
 
         {erreur && <p className="message erreur">{erreur}</p>}
