@@ -92,6 +92,8 @@ function resumeCommun(profil: Utilisateur, donnees: Donnees) {
   const soldeDisponible = [...soldes.values()].reduce((a, b) => a + b, 0)
   const maintenant = new Date()
   const joursDansLeMois = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 0).getDate()
+  // Jours qu'il reste à vivre ce mois-ci, aujourd'hui compris.
+  const joursRestants = joursDansLeMois - maintenant.getDate() + 1
 
   const categories = depensesParCategorie(donnees.transactions, moisCourant)
     .slice(0, 6)
@@ -133,8 +135,16 @@ function resumeCommun(profil: Utilisateur, donnees: Donnees) {
     devise: profil.devise,
     jour_du_mois: maintenant.getDate(),
     jours_dans_le_mois: joursDansLeMois,
+    jours_restants_ce_mois: joursRestants,
     solde_disponible: arrondi(soldeDisponible),
-    mois_en_cours: { revenus: arrondi(courant.revenus), depenses: arrondi(courant.depenses) },
+    // Calculés ici pour que l'IA n'ait aucune opération à faire.
+    solde_disponible_par_jour_restant: arrondi(soldeDisponible / joursRestants),
+    mois_en_cours: {
+      revenus: arrondi(courant.revenus),
+      depenses: arrondi(courant.depenses),
+      revenus_moins_depenses: arrondi(courant.revenus - courant.depenses),
+    },
+    depenses_par_rapport_au_mois_precedent: arrondi(courant.depenses - precedent.depenses),
     mois_precedent: { revenus: arrondi(precedent.revenus), depenses: arrondi(precedent.depenses) },
     revenu_mensuel_declare: revenuMensuelDeclare(donnees.sources),
     depenses_du_mois_par_categorie: categories,
@@ -256,10 +266,10 @@ export function donneesDepense(profil: Utilisateur, donnees: Donnees, d: Depense
       solde_disponible_apres: analyse.soldeApres,
       depenses_du_mois_avant: analyse.depensesMoisAvant,
       depenses_du_mois_apres: analyse.depensesMoisApres,
-      part_du_revenu_mensuel_pourcent: analyse.partDuRevenu,
+      la_depense_envisagee_represente_pourcent_du_revenu_mensuel: analyse.partDuRevenu,
       budget_du_projet: analyse.projet,
       effort_epargne_mensuel_total: analyse.effortEpargneMensuel,
-      reste_du_mois_pour_epargner_apres: analyse.resteDuMoisApres,
+      revenu_du_mois_moins_toutes_les_depenses_apres: analyse.resteDuMoisApres,
     },
   }
 }
