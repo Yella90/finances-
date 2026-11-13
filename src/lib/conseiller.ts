@@ -27,10 +27,14 @@ export type TypeDemande = 'bilan' | 'objectif' | 'depense'
 // --- Accord de l'utilisateur ------------------------------------------------
 
 const CLE_ACCORD = 'finances.conseiller.accord'
+// Version de ce que l'utilisateur a accepté d'envoyer. À augmenter dès que la
+// liste des données envoyées s'allonge, pour redemander l'accord.
+// 2 : ajout des mouvements récents avec leur date et leur note.
+const VERSION_ACCORD = '2'
 
 export function accordDonne(): boolean {
   try {
-    return localStorage.getItem(CLE_ACCORD) === '1'
+    return localStorage.getItem(CLE_ACCORD) === VERSION_ACCORD
   } catch {
     return false
   }
@@ -38,7 +42,7 @@ export function accordDonne(): boolean {
 
 export function donnerAccord(): void {
   try {
-    localStorage.setItem(CLE_ACCORD, '1')
+    localStorage.setItem(CLE_ACCORD, VERSION_ACCORD)
   } catch {
     // Sans stockage, l'accord sera redemandé à la prochaine ouverture.
   }
@@ -80,10 +84,28 @@ export async function demanderConseil(type: TypeDemande, donnees: unknown, quest
 }
 
 // --- Données envoyées -------------------------------------------------------
-// Uniquement des totaux et des noms de catégories, d'objectifs et de projets.
-// Jamais les notes des mouvements, ni le nom, l'email ou le téléphone.
+// Des totaux, les noms de catégories, d'objectifs et de projets, et les
+// mouvements récents avec leur date et leur note.
+// Jamais le nom, l'email ou le téléphone de l'utilisateur.
 
 const arrondi = (n: number) => Math.round(n)
+
+const MOUVEMENTS_ENVOYES = 40
+const LONGUEUR_NOTE = 80
+
+/** Les derniers mouvements, du plus récent au plus ancien, avec date et note. */
+function mouvementsRecents(donnees: Donnees) {
+  return donnees.transactions.slice(0, MOUVEMENTS_ENVOYES).map((t) => ({
+    date: t.date_operation,
+    type: t.type,
+    montant: arrondi(Number(t.montant)),
+    categorie: t.type === 'depense' ? donnees.categories.find((c) => c.id === t.categorie_id)?.nom ?? null : null,
+    source: t.type === 'revenu' ? donnees.sources.find((s) => s.id === t.source_revenu_id)?.nom ?? null : null,
+    projet: donnees.projets.find((p) => p.id === t.projet_id)?.nom ?? null,
+    objectif: donnees.objectifs.find((o) => o.id === t.objectif_id)?.nom ?? null,
+    note: t.note ? t.note.slice(0, LONGUEUR_NOTE) : null,
+  }))
+}
 
 function resumeCommun(profil: Utilisateur, donnees: Donnees) {
   const [moisPrecedent, moisCourant] = derniersMois(2)
@@ -147,9 +169,9 @@ function resumeCommun(profil: Utilisateur, donnees: Donnees) {
     depenses_par_rapport_au_mois_precedent: arrondi(courant.depenses - precedent.depenses),
     mois_precedent: { revenus: arrondi(precedent.revenus), depenses: arrondi(precedent.depenses) },
     revenu_mensuel_declare: revenuMensuelDeclare(donnees.sources),
-    depenses_du_mois_par_categorie: categories,
-    objectifs_epargne: objectifs,
+    depenses_du_mois_par_categorie: categories,    objectifs_epargne: objectifs,
     projets_en_cours: projets,
+    mouvements_recents: mouvementsRecents(donnees),
   }
 }
 

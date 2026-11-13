@@ -142,12 +142,14 @@ function Confidentialite() {
         Le conseiller est facultatif et ne s'active qu'avec votre accord. Une fois activé, il prépare de
         lui-même un bilan environ une fois par jour, et répond à vos questions. À chaque fois, l'application
         envoie au serveur {EDITEUR.nom}, qui les transmet à un fournisseur d'intelligence
-        artificielle, uniquement des chiffres : vos totaux de revenus et de dépenses par mois et par
-        catégorie, votre solde disponible, et le nom, le montant et l'avancement de vos objectifs et de vos
-        projets.
+        artificielle : vos totaux de revenus et de dépenses par mois et par catégorie, votre solde
+        disponible, le nom, le montant et l'avancement de vos objectifs et de vos projets, ainsi que vos 40
+        derniers mouvements avec leur date, leur montant, leur catégorie et leur note.
       </p>
       <p>
-        Votre nom, votre email, votre téléphone et les notes de vos mouvements ne sont jamais transmis. Les
+        Votre nom, votre email et votre téléphone ne sont jamais transmis. En revanche, si vos notes
+        contiennent des noms ou des détails personnels, ils sont transmis avec elles : évitez d'y écrire ce
+        que vous ne souhaitez pas partager. Les
         fournisseurs d'intelligence artificielle sont situés hors du Mali. Les réponses sont générées
         automatiquement et peuvent contenir des erreurs.
       </p>

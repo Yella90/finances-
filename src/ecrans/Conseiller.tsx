@@ -130,11 +130,13 @@ export default function Conseiller(props: { profil: Utilisateur; donnees: Donnee
             <ul className="constats">
               <li>vos totaux de revenus et de dépenses, par mois et par catégorie ;</li>
               <li>votre solde disponible ;</li>
-              <li>le nom, le montant et l'avancement de vos objectifs et de vos projets.</li>
+              <li>le nom, le montant et l'avancement de vos objectifs et de vos projets ;</li>
+              <li>vos 40 derniers mouvements : date, montant, catégorie et note.</li>
             </ul>
             <p className="discret">
-              Ne sont jamais envoyés : votre nom, votre email, votre téléphone et les notes de vos mouvements. Les
-              conseils portent sur la gestion du budget ; ce ne sont pas des conseils de placement.
+              Ne sont jamais envoyés : votre nom, votre email et votre téléphone. Si vos notes contiennent des
+              noms ou des détails personnels, ils seront transmis avec elles. Les conseils portent sur la gestion du
+              budget ; ce ne sont pas des conseils de placement.
             </p>
             <button
               className="bouton principal"
