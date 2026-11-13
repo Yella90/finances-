@@ -139,8 +139,9 @@ function Confidentialite() {
 
       <h2>4 bis. Le conseiller (intelligence artificielle)</h2>
       <p>
-        Le conseiller est facultatif et ne s'active qu'avec votre accord. Quand vous lui posez une question,
-        l'application envoie au serveur {EDITEUR.nom}, qui les transmet à un fournisseur d'intelligence
+        Le conseiller est facultatif et ne s'active qu'avec votre accord. Une fois activé, il prépare de
+        lui-même un bilan environ une fois par jour, et répond à vos questions. À chaque fois, l'application
+        envoie au serveur {EDITEUR.nom}, qui les transmet à un fournisseur d'intelligence
         artificielle, uniquement des chiffres : vos totaux de revenus et de dépenses par mois et par
         catégorie, votre solde disponible, et le nom, le montant et l'avancement de vos objectifs et de vos
         projets.

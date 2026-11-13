@@ -26,7 +26,7 @@ function lireMontant(texte: string): number {
 }
 
 /** Affiche la réponse : paragraphes, et listes pour les lignes qui commencent par un tiret. */
-function Reponse({ texte }: { texte: string }) {
+export function Reponse({ texte }: { texte: string }) {
   const blocs: { liste: boolean; lignes: string[] }[] = []
   for (const brute of texte.split('\n')) {
     const ligne = brute.trim().replace(/\*\*/g, '')
@@ -123,8 +123,9 @@ export default function Conseiller(props: { profil: Utilisateur; donnees: Donnee
         {!accord ? (
           <>
             <p>
-              Le conseiller commente vos chiffres à l'aide d'une intelligence artificielle. Pour cela, l'app envoie
-              au serveur UNITECH, puis à un fournisseur d'IA :
+              Le conseiller commente vos chiffres à l'aide d'une intelligence artificielle. Une fois activé, il
+              prépare aussi de lui-même un bilan, environ une fois par jour, affiché sur l'accueil. Pour cela, l'app
+              envoie au serveur UNITECH, puis à un fournisseur d'IA :
             </p>
             <ul className="constats">
               <li>vos totaux de revenus et de dépenses, par mois et par catégorie ;</li>

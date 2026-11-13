@@ -3,6 +3,8 @@ import { depensesParCategorie, soldesParCompte, totauxParMois } from '../lib/cal
 import { derniersMois, formaterMontant, nomMois } from '../lib/format'
 import { useEnLigne, useEtatSync, type Donnees } from '../lib/hooks'
 import type { Utilisateur } from '../types'
+import { useConseilAuto } from '../lib/conseilAuto'
+import { Reponse } from './Conseiller'
 import LigneTransaction from './LigneTransaction'
 
 export default function Accueil(props: {
@@ -26,6 +28,7 @@ export default function Accueil(props: {
   const parCategorie = useMemo(() => depensesParCategorie(transactions, moisCourant), [transactions, moisCourant])
 
   const prenom = profil.nom_complet.split(' ')[0]
+  const conseil = useConseilAuto(profil, donnees)
 
   return (
     <>
@@ -70,15 +73,58 @@ export default function Accueil(props: {
             </div>
           </section>
 
-          <section className="carte conseiller-entree">
-            <div>
-              <h2>Conseiller</h2>
-              <p className="discret">Un bilan du mois, un guide pour vos objectifs, un avis avant une dépense.</p>
-            </div>
-            <button className="bouton principal" onClick={ouvrirConseiller}>
-              Ouvrir
-            </button>
-          </section>
+          {!conseil.actif ? (
+            <section className="carte conseiller-entree">
+              <div>
+                <h2>Conseiller</h2>
+                <p className="discret">
+                  Activez-le pour recevoir chaque jour un bilan et des conseils, sans avoir à les demander.
+                </p>
+              </div>
+              <button className="bouton principal" onClick={ouvrirConseiller}>
+                Activer
+              </button>
+            </section>
+          ) : (
+            <section className="carte">
+              <div className="ligne">
+                <h2>Conseil du jour</h2>
+                {conseil.recuLe && (
+                  <span className="discret">
+                    {new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(
+                      new Date(conseil.recuLe),
+                    )}
+                  </span>
+                )}
+              </div>
+
+              {conseil.contenu ? (
+                <Reponse texte={conseil.contenu} />
+              ) : (
+                <p className="discret">
+                  {conseil.chargement
+                    ? 'Le conseiller prépare votre premier bilan. Cela peut prendre jusqu\'à une minute.'
+                    : transactions.length === 0
+                      ? 'Votre premier conseil arrivera dès que vous aurez saisi un revenu ou une dépense.'
+                      : 'Votre conseil s\'affichera ici à la prochaine connexion.'}
+                </p>
+              )}
+
+              {conseil.erreur && <p className="message erreur">{conseil.erreur}</p>}
+              {conseil.contenu && (
+                <p className="discret">Rédigé par une IA à partir de vos chiffres. Elle peut se tromper.</p>
+              )}
+
+              <div className="deux">
+                <button className="bouton" onClick={conseil.actualiser} disabled={conseil.chargement || transactions.length === 0}>
+                  {conseil.chargement ? 'Mise à jour…' : 'Actualiser'}
+                </button>
+                <button className="bouton" onClick={ouvrirConseiller}>
+                  Poser une question
+                </button>
+              </div>
+            </section>
+          )}
 
           <section className="carte">
             <h2>Revenus et dépenses sur 6 mois</h2>
