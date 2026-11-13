@@ -11,6 +11,7 @@ import Reglages from './ecrans/Reglages'
 import Plans from './ecrans/Plans'
 import Saisie from './ecrans/Saisie'
 import Legal from './ecrans/Legal'
+import Conseiller from './ecrans/Conseiller'
 import { lirePageLegale } from './lib/editeur'
 import { ecouterAnnonces, type Annonce } from './lib/notifications'
 
@@ -98,6 +99,7 @@ function Application(props: {
   const { profil, onglet, setOnglet, saisieOuverte, setSaisieOuverte } = props
   const donnees = useDonnees()
   const [annonce, setAnnonce] = useState<Annonce | null>(null)
+  const [conseillerOuvert, setConseillerOuvert] = useState(false)
 
   useEffect(() => ecouterAnnonces(setAnnonce), [])
   useEffect(() => {
@@ -121,7 +123,12 @@ function Application(props: {
       )}
       <main className="contenu">
         {onglet === 'accueil' && (
-          <Accueil profil={profil} donnees={donnees} allerAuxReglages={() => setOnglet('reglages')} />
+          <Accueil
+            profil={profil}
+            donnees={donnees}
+            allerAuxReglages={() => setOnglet('reglages')}
+            ouvrirConseiller={() => setConseillerOuvert(true)}
+          />
         )}
         {onglet === 'transactions' && <Transactions profil={profil} donnees={donnees} />}
         {onglet === 'plans' && <Plans profil={profil} donnees={donnees} />}
@@ -155,6 +162,9 @@ function Application(props: {
         </button>
       </nav>
 
+      {conseillerOuvert && (
+        <Conseiller profil={profil} donnees={donnees} fermer={() => setConseillerOuvert(false)} />
+      )}
       {saisieOuverte && <Saisie profil={profil} donnees={donnees} fermer={() => setSaisieOuverte(false)} />}
     </div>
   )

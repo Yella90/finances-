@@ -119,7 +119,8 @@ function Confidentialite() {
         <li>créer et sécuriser votre compte ;</li>
         <li>afficher vos soldes, vos graphiques et vos alertes ;</li>
         <li>synchroniser vos données entre vos appareils ;</li>
-        <li>vous envoyer les notifications que vous avez activées.</li>
+        <li>vous envoyer les notifications que vous avez activées ;</li>
+        <li>commenter vos chiffres avec le conseiller, si vous l'utilisez.</li>
       </ul>
       <p>Nous ne vendons pas vos données et nous ne les utilisons pas pour de la publicité.</p>
 
@@ -135,6 +136,20 @@ function Confidentialite() {
         </li>
       </ul>
       <p>Vos données sont donc transférées et conservées en dehors du Mali.</p>
+
+      <h2>4 bis. Le conseiller (intelligence artificielle)</h2>
+      <p>
+        Le conseiller est facultatif et ne s'active qu'avec votre accord. Quand vous lui posez une question,
+        l'application envoie au serveur {EDITEUR.nom}, qui les transmet à un fournisseur d'intelligence
+        artificielle, uniquement des chiffres : vos totaux de revenus et de dépenses par mois et par
+        catégorie, votre solde disponible, et le nom, le montant et l'avancement de vos objectifs et de vos
+        projets.
+      </p>
+      <p>
+        Votre nom, votre email, votre téléphone et les notes de vos mouvements ne sont jamais transmis. Les
+        fournisseurs d'intelligence artificielle sont situés hors du Mali. Les réponses sont générées
+        automatiquement et peuvent contenir des erreurs.
+      </p>
 
       <h2>5. Sécurité</h2>
       <ul>

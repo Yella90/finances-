@@ -5,8 +5,13 @@ import { useEnLigne, useEtatSync, type Donnees } from '../lib/hooks'
 import type { Utilisateur } from '../types'
 import LigneTransaction from './LigneTransaction'
 
-export default function Accueil(props: { profil: Utilisateur; donnees: Donnees; allerAuxReglages: () => void }) {
-  const { profil, donnees, allerAuxReglages } = props
+export default function Accueil(props: {
+  profil: Utilisateur
+  donnees: Donnees
+  allerAuxReglages: () => void
+  ouvrirConseiller: () => void
+}) {
+  const { profil, donnees, allerAuxReglages, ouvrirConseiller } = props
   const { comptes, categories, transactions } = donnees
   const argent = (m: number) => formaterMontant(m, profil.devise)
 
@@ -63,6 +68,16 @@ export default function Accueil(props: { profil: Utilisateur; donnees: Donnees; 
               <p>Dépenses du mois</p>
               <strong className="negatif">−{argent(ceMois.depenses)}</strong>
             </div>
+          </section>
+
+          <section className="carte conseiller-entree">
+            <div>
+              <h2>Conseiller</h2>
+              <p className="discret">Un bilan du mois, un guide pour vos objectifs, un avis avant une dépense.</p>
+            </div>
+            <button className="bouton principal" onClick={ouvrirConseiller}>
+              Ouvrir
+            </button>
           </section>
 
           <section className="carte">
