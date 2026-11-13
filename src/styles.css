@@ -1052,3 +1052,28 @@ a {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+
+/* Sources de revenu : description et zone de texte */
+
+.mouvement .texte small.description {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  margin-top: 2px;
+}
+
+.formulaire textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--fond);
+  color: var(--texte);
+  font: inherit;
+  resize: vertical;
+}
+
+.formulaire textarea:focus-visible {
+  outline: 2px solid var(--vert);
+  outline-offset: 2px;
+}

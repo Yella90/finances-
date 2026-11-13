@@ -30,7 +30,8 @@ const CLE_ACCORD = 'finances.conseiller.accord'
 // Version de ce que l'utilisateur a accepté d'envoyer. À augmenter dès que la
 // liste des données envoyées s'allonge, pour redemander l'accord.
 // 2 : ajout des mouvements récents avec leur date et leur note.
-const VERSION_ACCORD = '2'
+// 3 : ajout des sources de revenu avec la description de l'activité.
+const VERSION_ACCORD = '3'
 
 export function accordDonne(): boolean {
   try {
@@ -169,7 +170,15 @@ function resumeCommun(profil: Utilisateur, donnees: Donnees) {
     depenses_par_rapport_au_mois_precedent: arrondi(courant.depenses - precedent.depenses),
     mois_precedent: { revenus: arrondi(precedent.revenus), depenses: arrondi(precedent.depenses) },
     revenu_mensuel_declare: revenuMensuelDeclare(donnees.sources),
-    depenses_du_mois_par_categorie: categories,    objectifs_epargne: objectifs,
+    sources_de_revenu: donnees.sources.map((s) => ({
+      nom: s.nom,
+      type: s.type,
+      frequence: s.frequence,
+      montant_prevu: s.montant_prevu != null ? arrondi(Number(s.montant_prevu)) : null,
+      description_de_l_activite: s.description ? s.description.slice(0, 300) : null,
+    })),
+    depenses_du_mois_par_categorie: categories,
+    objectifs_epargne: objectifs,
     projets_en_cours: projets,
     mouvements_recents: mouvementsRecents(donnees),
   }

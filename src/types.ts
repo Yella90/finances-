@@ -30,6 +30,8 @@ export type Frequence = 'ponctuel' | 'hebdomadaire' | 'mensuel' | 'annuel' | 'ir
 
 export interface SourceRevenu extends LigneBase {
   nom: string
+  /** L'activité derrière ce revenu, décrite par l'utilisateur. */
+  description: string | null
   type: TypeSource
   montant_prevu: number | null
   frequence: Frequence

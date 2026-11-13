@@ -131,7 +131,8 @@ export default function Conseiller(props: { profil: Utilisateur; donnees: Donnee
               <li>vos totaux de revenus et de dépenses, par mois et par catégorie ;</li>
               <li>votre solde disponible ;</li>
               <li>le nom, le montant et l'avancement de vos objectifs et de vos projets ;</li>
-              <li>vos 40 derniers mouvements : date, montant, catégorie et note.</li>
+              <li>vos 40 derniers mouvements : date, montant, catégorie et note ;</li>
+              <li>vos sources de revenu, avec la description de l'activité.</li>
             </ul>
             <p className="discret">
               Ne sont jamais envoyés : votre nom, votre email et votre téléphone. Si vos notes contiennent des

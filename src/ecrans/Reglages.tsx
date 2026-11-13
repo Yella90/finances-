@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { soldesParCompte } from '../lib/calculs'
-import { creer, db, supprimer } from '../lib/db'
+import { creer, db, modifier, supprimer } from '../lib/db'
 import { formaterMontant } from '../lib/format'
 import { useEtatSync, type Donnees } from '../lib/hooks'
 import {
@@ -11,7 +11,7 @@ import {
 } from '../lib/notifications'
 import { deconnecter } from '../lib/session'
 import { synchroniser } from '../lib/sync'
-import type { Frequence, TypeCompte, TypeSource, Utilisateur } from '../types'
+import type { Frequence, SourceRevenu, TypeCompte, TypeSource, Utilisateur } from '../types'
 import SignatureUnitech from './SignatureUnitech'
 
 const TYPES_COMPTE: Record<TypeCompte, string> = {
@@ -52,6 +52,8 @@ export default function Reglages(props: { profil: Utilisateur; donnees: Donnees 
     [donnees.comptes, donnees.transactions],
   )
   const sync = useEtatSync()
+  const [sourceEnEdition, setSourceEnEdition] = useState<string | null>(null)
+  const sourceModifiee = donnees.sources.find((s) => s.id === sourceEnEdition)
 
   async function retirerCompte(id: string, nom: string) {
     const utilise = (await db.transactions.where('compte_id').equals(id).toArray()).some((t) => !t.supprime_le)
@@ -67,6 +69,7 @@ export default function Reglages(props: { profil: Utilisateur; donnees: Donnees 
   async function retirerSource(id: string, nom: string) {
     if (!window.confirm(`Supprimer la source « ${nom} » ?`)) return
     await supprimer('sources_revenu', id)
+    if (sourceEnEdition === id) setSourceEnEdition(null)
     void synchroniser()
   }
 
@@ -115,16 +118,32 @@ export default function Reglages(props: { profil: Utilisateur; donnees: Donnees 
                 <strong>{s.nom}</strong>
                 <small>
                   {TYPES_SOURCE[s.type]} · {FREQUENCES[s.frequence]}
+                  {s.montant_prevu != null ? ` · ${argent(Number(s.montant_prevu))}` : ''}
                 </small>
+                {s.description && <small className="description">{s.description}</small>}
               </div>
-              <span className="montant">{s.montant_prevu != null ? argent(Number(s.montant_prevu)) : ''}</span>
+              <button
+                className="icone-bouton"
+                onClick={() => setSourceEnEdition(s.id)}
+                aria-label={`Modifier ${s.nom}`}
+                aria-pressed={sourceEnEdition === s.id}
+              >
+                ✎
+              </button>
               <button className="icone-bouton" onClick={() => retirerSource(s.id, s.nom)} aria-label={`Supprimer ${s.nom}`}>
                 ✕
               </button>
             </li>
           ))}
         </ul>
-        <FormulaireSource profil={profil} donnees={donnees} />
+        {/* La clé force un formulaire neuf quand on passe d'une source à une autre. */}
+        <FormulaireSource
+          key={sourceModifiee?.id ?? 'nouvelle'}
+          profil={profil}
+          donnees={donnees}
+          source={sourceModifiee}
+          fermer={() => setSourceEnEdition(null)}
+        />
       </section>
 
       <SectionNotifications profil={profil} />
@@ -278,40 +297,66 @@ function FormulaireCompte({ profil }: { profil: Utilisateur }) {
   )
 }
 
-function FormulaireSource({ profil, donnees }: { profil: Utilisateur; donnees: Donnees }) {
-  const [nom, setNom] = useState('')
-  const [type, setType] = useState<TypeSource>('salaire')
-  const [frequence, setFrequence] = useState<Frequence>('mensuel')
-  const [montant, setMontant] = useState('')
-  const [compteId, setCompteId] = useState('')
+/** Sert à la fois à ajouter une source et, si « source » est fourni, à la modifier. */
+function FormulaireSource(props: {
+  profil: Utilisateur
+  donnees: Donnees
+  source?: SourceRevenu
+  fermer: () => void
+}) {
+  const { profil, donnees, source, fermer } = props
+  const [nom, setNom] = useState(source?.nom ?? '')
+  const [description, setDescription] = useState(source?.description ?? '')
+  const [type, setType] = useState<TypeSource>(source?.type ?? 'salaire')
+  const [frequence, setFrequence] = useState<Frequence>(source?.frequence ?? 'mensuel')
+  const [montant, setMontant] = useState(source?.montant_prevu != null ? String(Number(source.montant_prevu)) : '')
+  const [compteId, setCompteId] = useState(source?.compte_id ?? '')
   const [erreur, setErreur] = useState<string | null>(null)
 
-  async function ajouter(e: FormEvent) {
+  async function enregistrer(e: FormEvent) {
     e.preventDefault()
     const prevu = montant.trim() === '' ? null : lireMontant(montant)
     if (prevu !== null && (Number.isNaN(prevu) || prevu < 0)) {
       setErreur('Le montant prévu doit être un nombre positif.')
       return
     }
-    await creer('sources_revenu', profil.id, {
+    const champs = {
       nom: nom.trim(),
+      description: description.trim() || null,
       type,
       frequence,
       montant_prevu: prevu,
       compte_id: compteId || null,
-      actif: true,
-    })
-    setNom('')
-    setMontant('')
+    }
+    if (source) {
+      await modifier('sources_revenu', source.id, champs)
+      fermer()
+    } else {
+      await creer('sources_revenu', profil.id, { ...champs, actif: true })
+      setNom('')
+      setDescription('')
+      setMontant('')
+    }
     setErreur(null)
     void synchroniser()
   }
 
   return (
-    <form className="formulaire ajout-ligne" onSubmit={ajouter}>
+    <form className="formulaire ajout-ligne" onSubmit={enregistrer}>
+      {source && <strong>Modifier « {source.nom} »</strong>}
       <label>
         Nom de la source
         <input value={nom} onChange={(e) => setNom(e.target.value)} required placeholder="Salaire" />
+      </label>
+      <label>
+        Description de l'activité
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          maxLength={300}
+          rows={3}
+          placeholder="Vente de pagnes au marché, surtout le week-end. Les revenus baissent pendant l'hivernage."
+        />
       </label>
       <div className="deux">
         <label>
@@ -353,9 +398,20 @@ function FormulaireSource({ profil, donnees }: { profil: Utilisateur; donnees: D
         </label>
       </div>
       {erreur && <p className="message erreur">{erreur}</p>}
-      <button className="bouton" type="submit">
-        Ajouter la source
-      </button>
+      {source ? (
+        <div className="deux">
+          <button className="bouton" type="button" onClick={fermer}>
+            Annuler
+          </button>
+          <button className="bouton principal" type="submit">
+            Enregistrer
+          </button>
+        </div>
+      ) : (
+        <button className="bouton" type="submit">
+          Ajouter la source
+        </button>
+      )}
     </form>
   )
 }

@@ -144,7 +144,8 @@ function Confidentialite() {
         envoie au serveur {EDITEUR.nom}, qui les transmet à un fournisseur d'intelligence
         artificielle : vos totaux de revenus et de dépenses par mois et par catégorie, votre solde
         disponible, le nom, le montant et l'avancement de vos objectifs et de vos projets, ainsi que vos 40
-        derniers mouvements avec leur date, leur montant, leur catégorie et leur note.
+        derniers mouvements avec leur date, leur montant, leur catégorie et leur note, et vos sources de
+        revenu avec la description de l'activité.
       </p>
       <p>
         Votre nom, votre email et votre téléphone ne sont jamais transmis. En revanche, si vos notes
