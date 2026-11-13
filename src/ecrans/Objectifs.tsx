@@ -6,6 +6,7 @@ import type { Donnees } from '../lib/hooks'
 import { annoncer } from '../lib/notifications'
 import { synchroniser } from '../lib/sync'
 import type { ObjectifEpargne, Utilisateur } from '../types'
+import Simulation from './Simulation'
 
 const ICONES = ['🎯', '🏍️', '🏠', '🎓', '🛡️', '🎉', '✈️', '📦']
 
@@ -19,6 +20,7 @@ export default function Objectifs(props: { profil: Utilisateur; donnees: Donnees
   const argent = (m: number) => formaterMontant(m, profil.devise)
   const epargne = useMemo(() => epargneParObjectif(donnees.transactions), [donnees.transactions])
   const [versementPour, setVersementPour] = useState<string | null>(null)
+  const [simulationPour, setSimulationPour] = useState<string | null>(null)
 
   const totalEpargne = donnees.objectifs.reduce((s, o) => s + (epargne.get(o.id) ?? 0), 0)
 
@@ -110,14 +112,29 @@ export default function Objectifs(props: { profil: Utilisateur; donnees: Donnees
               />
             ) : (
               !s.atteint && (
-                <button
-                  className="bouton"
-                  onClick={() => setVersementPour(o.id)}
-                  disabled={donnees.comptes.length === 0}
-                >
-                  Verser de l'argent
-                </button>
+                <div className="deux">
+                  <button
+                    className="bouton"
+                    onClick={() => setVersementPour(o.id)}
+                    disabled={donnees.comptes.length === 0}
+                  >
+                    Verser
+                  </button>
+                  <button className="bouton" onClick={() => setSimulationPour(simulationPour === o.id ? null : o.id)}>
+                    Simuler
+                  </button>
+                </div>
               )
+            )}
+
+            {simulationPour === o.id && !s.atteint && (
+              <Simulation
+                profil={profil}
+                donnees={donnees}
+                objectif={o}
+                suivi={s}
+                fermer={() => setSimulationPour(null)}
+              />
             )}
           </section>
         )

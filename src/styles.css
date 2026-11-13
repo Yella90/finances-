@@ -956,3 +956,51 @@ a {
 .carte > .ligne {
   align-items: center;
 }
+
+/* Simulation de Monte-Carlo */
+
+.simulation {
+  border-top: 1px solid var(--trait);
+  padding-top: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.chance {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--vert-clair);
+  color: var(--positif);
+}
+
+.chance.moyen {
+  background: var(--attention-fond);
+  color: var(--attention-texte);
+}
+
+.chance.faible {
+  background: var(--erreur-fond);
+  color: var(--negatif);
+}
+
+.chance strong {
+  font-size: 2rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chance span {
+  font-size: 0.9rem;
+}
+
+.constats {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+}
