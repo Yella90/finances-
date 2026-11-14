@@ -4,6 +4,7 @@ import { derniersMois, formaterMontant, nomMois } from '../lib/format'
 import { useEnLigne, useEtatSync, type Donnees } from '../lib/hooks'
 import type { Utilisateur } from '../types'
 import { useConseilAuto } from '../lib/conseilAuto'
+import { projectionFinDeMois } from '../lib/projection'
 import { Reponse } from './Conseiller'
 import LigneTransaction from './LigneTransaction'
 
@@ -29,6 +30,7 @@ export default function Accueil(props: {
 
   const prenom = profil.nom_complet.split(' ')[0]
   const conseil = useConseilAuto(profil, donnees)
+  const prevision = useMemo(() => projectionFinDeMois(donnees), [donnees])
 
   return (
     <>
@@ -71,6 +73,45 @@ export default function Accueil(props: {
               <p>Dépenses du mois</p>
               <strong className="negatif">−{argent(ceMois.depenses)}</strong>
             </div>
+          </section>
+
+          <section className="carte">
+            <div className="ligne">
+              <h2>Prévision de fin de mois</h2>
+              <span className="discret">
+                {prevision.joursRestants === 0 ? 'Dernier jour' : `${prevision.joursRestants} jour(s) restant(s)`}
+              </span>
+            </div>
+            <dl className="analyse">
+              <dt>Revenus encore attendus</dt>
+              <dd>
+                {prevision.baseRevenus === 'inconnue' ? (
+                  <span className="discret">inconnus</span>
+                ) : (
+                  <strong className="positif">+{argent(prevision.revenusEncoreAttendus)}</strong>
+                )}
+              </dd>
+              <dt>Dépenses encore prévues</dt>
+              <dd>
+                <strong className="negatif">−{argent(prevision.depensesEncorePrevues)}</strong>
+              </dd>
+              <dt>Solde prévu à la fin du mois</dt>
+              <dd>
+                <strong className={prevision.soldeProjeteFinDeMois < 0 ? 'negatif' : ''}>
+                  {argent(prevision.soldeProjeteFinDeMois)}
+                </strong>
+              </dd>
+            </dl>
+            <p className="discret">
+              {prevision.baseRevenus === 'sources_declarees'
+                ? 'Revenus d\'après vos sources déclarées, dépenses au rythme des jours écoulés.'
+                : prevision.baseRevenus === 'moyenne_des_mois_passes'
+                  ? 'Revenus d\'après la moyenne de vos mois passés, dépenses au rythme des jours écoulés.'
+                  : 'Renseignez le montant prévu de vos sources de revenu dans les réglages pour estimer les revenus à venir.'}
+              {prevision.fiabilite === 'faible' && prevision.baseRevenus !== 'inconnue'
+                ? ' Le mois commence à peine : cette prévision est encore incertaine.'
+                : ''}
+            </p>
           </section>
 
           {!conseil.actif ? (

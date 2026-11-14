@@ -16,6 +16,7 @@ import {
 import { derniersMois } from './format'
 import type { Donnees } from './hooks'
 import { lireSessionStockee } from './jeton'
+import { projectionFinDeMois } from './projection'
 import { historiqueMensuel, revenuMensuelDeclare, simuler } from './simulation'
 import type { ObjectifEpargne, Utilisateur } from '../types'
 
@@ -162,11 +163,12 @@ function resumeCommun(profil: Utilisateur, donnees: Donnees) {
     solde_disponible: arrondi(soldeDisponible),
     // Calculés ici pour que l'IA n'ait aucune opération à faire.
     solde_disponible_par_jour_restant: arrondi(soldeDisponible / joursRestants),
-    mois_en_cours: {
-      revenus: arrondi(courant.revenus),
-      depenses: arrondi(courant.depenses),
-      revenus_moins_depenses: arrondi(courant.revenus - courant.depenses),
+    // Le mois n'est pas fini : ces chiffres sont « à ce jour », pas un résultat.
+    mois_en_cours_a_ce_jour: {
+      revenus_deja_recus: arrondi(courant.revenus),
+      depenses_deja_faites: arrondi(courant.depenses),
     },
+    projection_fin_de_mois: projectionPourConseiller(donnees),
     depenses_par_rapport_au_mois_precedent: arrondi(courant.depenses - precedent.depenses),
     mois_precedent: { revenus: arrondi(precedent.revenus), depenses: arrondi(precedent.depenses) },
     revenu_mensuel_declare: revenuMensuelDeclare(donnees.sources),
@@ -181,6 +183,33 @@ function resumeCommun(profil: Utilisateur, donnees: Donnees) {
     objectifs_epargne: objectifs,
     projets_en_cours: projets,
     mouvements_recents: mouvementsRecents(donnees),
+  }
+}
+
+/** La projection de fin de mois, avec des noms de champs explicites pour l'IA. */
+function projectionPourConseiller(donnees: Donnees) {
+  const p = projectionFinDeMois(donnees)
+  const epargne = epargneParObjectif(donnees.transactions)
+  const effortEpargne = donnees.objectifs.reduce((total, o) => {
+    const s = suiviObjectif(o, epargne.get(o.id) ?? 0)
+    return total + (s.atteint ? 0 : s.effortMensuel ?? 0)
+  }, 0)
+
+  return {
+    le_mois_est_termine: false,
+    jours_ecoules: p.joursEcoules,
+    jours_restants_apres_aujourd_hui: p.joursRestants,
+    revenus_encore_attendus_d_ici_la_fin_du_mois: p.revenusEncoreAttendus,
+    revenus_attendus_sur_le_mois_entier: p.revenusAttendusSurLeMois,
+    origine_des_revenus_attendus: p.baseRevenus,
+    depenses_encore_prevues_au_rythme_actuel: p.depensesEncorePrevues,
+    depenses_projetees_sur_le_mois_entier: p.depensesProjeteesSurLeMois,
+    depense_exceptionnelle_exclue_du_rythme: p.depenseExceptionnelle,
+    solde_projete_a_la_fin_du_mois: p.soldeProjeteFinDeMois,
+    reste_projete_sur_le_mois_entier: p.resteProjete,
+    epargne_prevue_ce_mois_pour_les_objectifs: arrondi(effortEpargne),
+    reste_projete_apres_epargne_prevue: arrondi(p.resteProjete - effortEpargne),
+    fiabilite_de_la_projection: p.fiabilite,
   }
 }
 
